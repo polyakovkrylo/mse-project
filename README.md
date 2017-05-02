@@ -13,3 +13,9 @@
 **Vladimir Poliakov**
 
 - [x] Fullfil requirement template
+
+
+**Hector Munoz**
+
+- [x] Applications scenarios of 7, 8, 9, and 12.
+- [x] Requirements of 7, 8, 9, and 12 scenarios.
