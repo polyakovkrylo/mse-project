@@ -175,6 +175,7 @@ static THD_FUNCTION(GyrosTask, arg) {
 
 static THD_WORKING_AREA(waRollAssisTask, 128);
 static THD_FUNCTION(RollAssisTask, arg) {
+	(void)arg;
 	while(TRUE){
 		switch(currentState[RollAssistance]){
 			case EnabledMonitoring:
@@ -201,11 +202,13 @@ static THD_FUNCTION(RollAssisTask, arg) {
 
 static THD_WORKING_AREA(waOCMTask, 128);
 static THD_FUNCTION(OCMTask, arg) {
+	(void)arg;
 
 }
 
 static THD_WORKING_AREA(waAltAssisTask, 128);
 static THD_FUNCTION(AltAssisTask, arg) {
+	(void)arg;
 	while(TRUE){
 		switch(currentState[AltAssistance]){
 			case EnabledSteady:
@@ -238,6 +241,7 @@ static THD_FUNCTION(AltAssisTask, arg) {
 
 static THD_WORKING_AREA(waModeTask, 128);
 static THD_FUNCTION(ModeTask, arg) {
+	(void)arg;
 	while(TRUE){
 		switch(currentState[Mode]){
 			case NoAssistance:
@@ -275,14 +279,14 @@ int main(void) {
     int band=0;
     while (TRUE) {
 
-    	/*pwmEnableChannel(&PWMD4, 0, 700);	//700 = 0º
+    	pwmEnableChannel(&PWMD4, 0, 700);	//700 = 0º
     	chThdSleepMilliseconds(3000);
     	pwmEnableChannel(&PWMD4, 0, 1350);	//1350 = 90º
     	chThdSleepMilliseconds(3000);
     	pwmEnableChannel(&PWMD4, 0, 2000);	//2000 = 180º
     	chThdSleepMilliseconds(3000);
     	pwmEnableChannel(&PWMD4, 0, 1350);  //1350 = 90º
-    	chThdSleepMilliseconds(3000);*/
+    	chThdSleepMilliseconds(3000);
 
     	//REFLECTIVE
     	if(palReadPad(GPIOA, GPIOA_BUTTON)){
