@@ -16,6 +16,7 @@ enum Roles{
 };
 
 enum RollAssisStates{
+	EnabledRoll,
 	EnabledMonitoring,
 	EnabledRolling,
 	EnabledCompensating,
@@ -43,6 +44,7 @@ enum ModeStates{
 
 // System state
 int currentState[3];
+int8_t treshold=2.0f;
 
 /*********************gyroscope*********************/
 uint8_t Xval, Yval = 0x00;
@@ -125,6 +127,28 @@ void setState(int role, int state){
 
 	switch(role){
 		case RollAssistance:
+			switch(state){
+				case EnabledRoll:
+				break;
+
+				case EnabledMonitoring:
+				break;
+
+				case EnabledRolling:
+				break;
+
+				case EnabledCompensating:
+				break;
+
+				case EnabledRollBlocking:
+				break;
+
+				case EnabledTresholdUpdate:
+				break;
+
+				case DisabledRoll:
+				break;
+			}
 		break;
 		case AltAssistance:
 		break;
@@ -132,13 +156,18 @@ void setState(int role, int state){
 		break;
 	}
 }
+
+void updateTreshold(int altitudeModeChanged){
+	treshold=altitudeModeChanged;
+}
 /**********************TASKS**********************/
 static THD_WORKING_AREA(waGyrosTask, 128);
 static THD_FUNCTION(GyrosTask, arg) {
 
     (void)arg;
     chRegSetThreadName("Thread1");
-
+    palSetPadMode(GPIOD, 12, PAL_MODE_ALTERNATE(2));
+    pwmStart(&PWMD4, &pwmcfg);
     while (TRUE) {
 
 		while (readGyro(gyroData)==0) {}
@@ -157,43 +186,92 @@ static THD_FUNCTION(GyrosTask, arg) {
 			//if ( Xval>Yval){
 				if ((int8_t)gyroData[0] > 4.0f){
 					palSetPad(GPIOE, GPIOE_LED3_RED);
+					pwmEnableChannel(&PWMD4, 0, 700);
 				}
 				else if ((int8_t)gyroData[0] < -4.0f){
 					palSetPad(GPIOE, GPIOE_LED10_RED);
+					pwmEnableChannel(&PWMD4, 0, 1350);
 				}
 			//}
 			//else{
 				else if ((int8_t)gyroData[1] < -4.0f){
 					palSetPad(GPIOE, GPIOE_LED7_GREEN);
+					pwmEnableChannel(&PWMD4, 0, 2000);
 				}
 				else if ((int8_t)gyroData[1] > 4.0f){
 					palSetPad(GPIOE, GPIOE_LED6_GREEN);
+					pwmEnableChannel(&PWMD4, 0, 1350);
 				}
 			//}
+				chThdSleepMilliseconds(100);
 	}
 }
 
 static THD_WORKING_AREA(waRollAssisTask, 128);
 static THD_FUNCTION(RollAssisTask, arg) {
 	(void)arg;
+	//some variables
+	int altitudeModeChanged=0;
+	int rollInput=1;
 	while(TRUE){
 		switch(currentState[RollAssistance]){
+
+			case EnabledRoll:
+				if(palReadPad(GPIOA, GPIOA_BUTTON)){
+					// ENABLE / DISABLE
+					setState(RollAssistance, DisabledRoll);
+				}
+				chThdSleepMilliseconds(100);
+				setState(RollAssistance, EnabledMonitoring);
+			break;
+
 			case EnabledMonitoring:
+				if((ABS((int8_t)gyroData[0])>1.0f)||(ABS((int8_t)gyroData[1])>1.0f)){		//roll != 0
+					setState(RollAssistance, EnabledRolling);
+				}
+				else if(altitudeModeChanged==1){						//altitude_mode_changed
+					setState(RollAssistance, EnabledTresholdUpdate);
+				}
+				else if((int8_t)gyroData[0] < -3.0f){						//nose dive (led10 position)
+					setState(RollAssistance, EnabledCompensating);
+				}
 			break;
 
 			case EnabledRolling:
+				if(((int8_t)gyroData[0] < -3.0f)||(rollInput==0)){ 				//nosedive == true || roll_input == false
+					setState(RollAssistance, EnabledCompensating);
+				}
+				else if(ABS((int8_t)gyroData[1])>treshold){					//roll > treshold (2.0f initial)
+					setState(RollAssistance, EnabledRollBlocking);
+				}
 			break;
 
 			case EnabledCompensating:
+				if((ABS((int8_t)gyroData[0])<1.0f)||(ABS((int8_t)gyroData[1])<1.0f)){		//roll ~= 0
+					setState(RollAssistance, EnabledMonitoring);
+				}
+				else if(((int8_t)gyroData[0] > -3.0f)&&(rollInput==1)){ 			//nosedive == false || roll_input == true
+					setState(RollAssistance, EnabledRolling);
+				}
 			break;
 
 			case EnabledRollBlocking:
+				if(((int8_t)gyroData[0] < -3.0f)||(rollInput==0)){				//nosedive == true || roll_input == false
+					setState(RollAssistance, EnabledCompensating);
+				}
 			break;
 
 			case EnabledTresholdUpdate:
+				updateTreshold(2.0f);
+				chThdSleepMilliseconds(100);
+				setState(RollAssistance, EnabledMonitoring);
 			break;
 
 			case DisabledRoll:
+				if(palReadPad(GPIOA, GPIOA_BUTTON)){
+						// ENABLE / DISABLE
+						setState(RollAssistance, EnabledRoll);
+					}
 			break;
 		}
 		chThdSleepMilliseconds(100);
@@ -265,7 +343,7 @@ int main(void) {
 	i2cStart(&I2CD1, &i2cconfig);
 	initGyro();
 
-    palSetPadMode(GPIOD, 12, PAL_MODE_ALTERNATE(2));
+    //palSetPadMode(GPIOD, 12, PAL_MODE_ALTERNATE(2));
 
     //tasks init
     chThdCreateStatic(waGyrosTask, sizeof(waGyrosTask), NORMALPRIO+1, GyrosTask, NULL);
@@ -275,33 +353,9 @@ int main(void) {
     chThdCreateStatic(waModeTask, sizeof(waModeTask), NORMALPRIO+5, ModeTask, NULL);
 
     //pwm start config
-    pwmStart(&PWMD4, &pwmcfg);
-    int band=0;
+    //pwmStart(&PWMD4, &pwmcfg);
     while (TRUE) {
-
-    	pwmEnableChannel(&PWMD4, 0, 700);	//700 = 0º
-    	chThdSleepMilliseconds(3000);
-    	pwmEnableChannel(&PWMD4, 0, 1350);	//1350 = 90º
-    	chThdSleepMilliseconds(3000);
-    	pwmEnableChannel(&PWMD4, 0, 2000);	//2000 = 180º
-    	chThdSleepMilliseconds(3000);
-    	pwmEnableChannel(&PWMD4, 0, 1350);  //1350 = 90º
-    	chThdSleepMilliseconds(3000);
-
-    	//REFLECTIVE
-    	if(palReadPad(GPIOA, GPIOA_BUTTON)){
-    		// ENABLE / DISABLE
-    		if(band==0){
-    			palSetPad(GPIOE, GPIOE_LED8_ORANGE);
-    			//chThdSleepMilliseconds(2000);
-    			band=1;
-    		}
-    		else if((palReadPad(GPIOA, GPIOA_BUTTON))&&(band==1)){
-    			palClearPad(GPIOE, GPIOE_LED8_ORANGE);
-    			band=0;
-    		}
-    		chThdSleepMilliseconds(1000);
-    	}
+    	chThdSleepMilliseconds(1000);
     }
 }
 
