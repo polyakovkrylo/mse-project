@@ -80,23 +80,34 @@ static uint8_t readGyro(float* data){
 }
 /*********************gyroscope*********************/
 
-/*********************PWMICU*********************/
+/*********************PWM*************************/
+static void pwmpcb(PWMDriver *pwmp) {
+
+  (void)pwmp;
+  palClearPad(GPIOE, GPIOE_LED4_BLUE);
+}
+
+static void pwmc1cb(PWMDriver *pwmp) {
+
+  (void)pwmp;
+  palSetPad(GPIOE, GPIOE_LED4_BLUE);
+}
 
 static PWMConfig pwmcfg = {
-  1000000,                                    /* 10kHz PWM clock frequency.   */
-  20000,                                    /* Initial PWM period 1S.       */
-  NULL,
+  1000000,                                    /* 1MHz PWM clock frequency.   */
+  20000,                                    /* Initial PWM period 20 mili sec */
+  pwmpcb,
   {
-   {PWM_OUTPUT_ACTIVE_HIGH, NULL},
+   {PWM_OUTPUT_ACTIVE_HIGH, pwmc1cb},
    {PWM_OUTPUT_DISABLED, NULL},
    {PWM_OUTPUT_DISABLED, NULL},
    {PWM_OUTPUT_DISABLED, NULL}
   },
-  0,
-  0
+  0//,
+  //0
 };
 
-/*********************PWMICU*********************/
+/*********************PWM**************************/
 
 static THD_WORKING_AREA(waThread1, 128);
 static THD_FUNCTION(Thread1, arg) {
@@ -107,7 +118,6 @@ static THD_FUNCTION(Thread1, arg) {
     while (TRUE) {
 
 		float gyroData[3];
-
 
 		while (readGyro(gyroData)==0) {}
 
@@ -125,28 +135,22 @@ static THD_FUNCTION(Thread1, arg) {
 			Xval = ABS((int8_t)(gyroData[0]));
 			Yval = ABS((int8_t)(gyroData[1]));
 
-
-			/*if ((Yval> Xval) && ((int8_t)gyroData[1] < -20.0f) ){
-				palSetPad(GPIOE, GPIOE_LED6_GREEN);
-			}*/
-
 			if ( Xval>Yval){
-
 				if ((int8_t)gyroData[0] > 5.0f){
-
 				  palSetPad(GPIOE, GPIOE_LED10_RED);
-
 				}
+
 				if ((int8_t)gyroData[0] < -5.0f){
-
 					palSetPad(GPIOE, GPIOE_LED3_RED);
-
 				}
+
 			}
+
 			else{
 				if ((int8_t)gyroData[1] < -5.0f){
 					palSetPad(GPIOE, GPIOE_LED6_GREEN);
 				}
+
 				if ((int8_t)gyroData[1] > 5.0f){
 					palSetPad(GPIOE, GPIOE_LED7_GREEN);
 
@@ -172,11 +176,28 @@ int main(void) {
     pwmStart(&PWMD4, &pwmcfg);
 
     while (TRUE) {
-    	pwmEnableChannel(&PWMD4, 0, width);
-    	if(width == 700) dir = UP;
-		else if (width == 2000) dir = DOWN;
-		if (dir == UP) width += step;
-		else if (dir == DOWN) width -= step;
+
+    	pwmEnableChannel(&PWMD4, 0, 700);	//700 = 0º
+    	chThdSleepMilliseconds(3000);
+    	pwmEnableChannel(&PWMD4, 0, 1350);	//1350 = 90º
+    	chThdSleepMilliseconds(3000);
+    	pwmEnableChannel(&PWMD4, 0, 2000);	//2000 = 180º
+    	chThdSleepMilliseconds(3000);
+    	pwmEnableChannel(&PWMD4, 0, 1350);
+    	chThdSleepMilliseconds(3000);
+    	//pwmEnableChannel(&PWMD4, 0, PWM_DEGREES_TO_WIDTH(&PWMD4, 9000));
+    	if(width == 700){
+    		dir = UP;
+    	}
+		else if (width == 2000){
+			dir = DOWN;
+		}
+		if (dir == UP){
+			width += step;
+		}
+		else if (dir == DOWN){
+			width -= step;
+		}
 
 		chThdSleepMilliseconds(100);
 
