@@ -12,11 +12,12 @@
 enum Roles{
 	RollAssistance,
 	AltAssistance,
-	Mode
+	Mode,
+	RollOcm
 };
 
 enum RollAssisStates{
-	EnabledRoll,
+	//EnabledRoll,
 	EnabledMonitoring,
 	EnabledRolling,
 	EnabledCompensating,
@@ -31,7 +32,7 @@ enum AltAssisStates{
 	EnabledVerticalClimbing,
 	EnabledLanding,
 	EnabledAltBlocking,
-	EnabledSallRecovery,
+	EnabledStallRecovery,
 	EnabledEmergencyManual,
 	DisabledAlt
 };
@@ -42,14 +43,16 @@ enum ModeStates{
 	AutoNavigation
 };
 
-enum OcmChannels {
-  RollChannel,
-  PitchChannel
-}
-
+enum OcmStates{
+	DirectInput,
+	Automated
+};
 // System state
 int currentState[3];
-int8_t treshold=2.0f;
+static int landingAltitude=50;
+static int8_t minLandingPitch=-6.0f;
+static int8_t treshold=4.0f;
+static int8_t verticalAngle=5.0f;
 
 /*********************gyroscope*********************/
 uint8_t Xval, Yval = 0x00;
@@ -127,23 +130,17 @@ static PWMConfig pwmcfg = {
 
 /*********************PWM**************************/
 
-/*******************OCM************************/
-int gyroToServo(int gyroCode) {
-  int code = 2,71 ^ (gyroCode * 1.62) + 1350;
-  if(code > 2000)
-    return 2000;
-  else if(code < 700)
-    return 700;
-  else
-    return code;
+/*******************OCM************************//*
+double exp(float i) {
+  return (2,71 ** i);
 }
 
 void setPitch(int angle) {
-  pitch = angle;
+  pitch = angleToGyroCode(angle);
 }
 
 void setRoll(int angle) {
-  roll = angle;
+  roll = angleToGyroCode(angle);
 }
 
 void angleToGyroCode(int angle) {
@@ -151,28 +148,29 @@ void angleToGyroCode(int angle) {
 }
 
 void OcmTask() {
-  // Roll OCM
+
+  //RollOCM
+
   switch(state[RollOcmState]) {
   case DirectInput:
     break;
   case Automated:
-    int diff = roll - (int8_t)gyroData[1];
-    int code = gyroToServo(diff);// transfer gyroCode to PwmCode
-    pwmEnableChannel(&PWMD4, PitchChannel, code);	//700 = 0º
+    int diff = roll - Xval;
+    int code = exp()// transfer gyroCode to PwmCode
+    // enablePwm
     break;
   }
 
-  // Pitch OCM
   switch(state[PitchOcmState]) {
   case DirectInput:
     break;
   case Automated:
-  int diff = roll - (int8_t)gyroData[0];
-  int code = gyroToServo(diff);
-  pwmEnableChannel(&PWMD4, PitchChannel, code);
+  int diff = roll - Xval;
+  int code = exp()// transfer gyroCode to PwmCode
+  // enablePwm
   break;
   }
-}
+}*/
 /***********************************************/
 
 
@@ -182,29 +180,61 @@ void setState(int role, int state){
 	switch(role){
 		case RollAssistance:
 			switch(state){
-				case EnabledRoll:
-				break;
+				/*case EnabledRoll:
+				break;*/
 
 				case EnabledMonitoring:
+					setState(RollOcm, DirectInput);
 				break;
 
 				case EnabledRolling:
+					setState(RollOcm, DirectInput);
 				break;
 
 				case EnabledCompensating:
+					setState(RollOcm, Automated);
+					//setRoll(0);
 				break;
 
 				case EnabledRollBlocking:
+					setState(RollOcm, Automated);
+					//setRoll(treshold);
 				break;
 
-				case EnabledTresholdUpdate:
-				break;
+				/*case EnabledTresholdUpdate:
+				break;*/
 
-				case DisabledRoll:
-				break;
+				/*case DisabledRoll:
+				break;*/
 			}
 		break;
 		case AltAssistance:
+			switch(state){
+			case EnabledSteady:
+			break;
+
+			case EnabledFlight:
+			break;
+
+			case EnabledVerticalClimbing:
+			break;
+
+			case EnabledLanding:
+			break;
+
+			case EnabledAltBlocking:
+			break;
+
+			case EnabledStallRecovery:
+				setState(RollAssistance, EnabledCompensating);
+			break;
+
+			case EnabledEmergencyManual:
+			break;
+
+			case DisabledAlt:
+			break;
+			}
 		break;
 		case Mode:
 		break;
@@ -266,18 +296,19 @@ static THD_FUNCTION(RollAssisTask, arg) {
 	(void)arg;
 	//some variables
 	int altitudeModeChanged=0;
-	int rollInput=1;
+	int rollInput;
 	while(TRUE){
+		rollInput=palReadPad(GPIOA, GPIOA_BUTTON);
 		switch(currentState[RollAssistance]){
 
-			case EnabledRoll:
+			/*case EnabledRoll:
 				if(palReadPad(GPIOA, GPIOA_BUTTON)){
 					// ENABLE / DISABLE
 					setState(RollAssistance, DisabledRoll);
 				}
 				chThdSleepMilliseconds(100);
 				setState(RollAssistance, EnabledMonitoring);
-			break;
+			break;*/
 
 			case EnabledMonitoring:
 				if((ABS((int8_t)gyroData[0])>1.0f)||(ABS((int8_t)gyroData[1])>1.0f)){		//roll != 0
@@ -286,13 +317,13 @@ static THD_FUNCTION(RollAssisTask, arg) {
 				else if(altitudeModeChanged==1){						//altitude_mode_changed
 					setState(RollAssistance, EnabledTresholdUpdate);
 				}
-				else if((int8_t)gyroData[0] < -3.0f){						//nose dive (led10 position)
+				/*else if((int8_t)gyroData[0] < -3.0f){						//nose dive (led10 position)
 					setState(RollAssistance, EnabledCompensating);
-				}
+				}*/
 			break;
 
 			case EnabledRolling:
-				if(((int8_t)gyroData[0] < -3.0f)||(rollInput==0)){ 				//nosedive == true || roll_input == false
+				if(rollInput==0){ 				//nosedive == true || roll_input == false
 					setState(RollAssistance, EnabledCompensating);
 				}
 				else if(ABS((int8_t)gyroData[1])>treshold){					//roll > treshold (2.0f initial)
@@ -304,7 +335,7 @@ static THD_FUNCTION(RollAssisTask, arg) {
 				if((ABS((int8_t)gyroData[0])<1.0f)||(ABS((int8_t)gyroData[1])<1.0f)){		//roll ~= 0
 					setState(RollAssistance, EnabledMonitoring);
 				}
-				else if(((int8_t)gyroData[0] > -3.0f)&&(rollInput==1)){ 			//nosedive == false || roll_input == true
+				else if((currentState[AltAssistance]==EnabledStallRecovery)&&(rollInput==1)){ 			//nosedive == false || roll_input == true
 					setState(RollAssistance, EnabledRolling);
 				}
 			break;
@@ -321,12 +352,12 @@ static THD_FUNCTION(RollAssisTask, arg) {
 				setState(RollAssistance, EnabledMonitoring);
 			break;
 
-			case DisabledRoll:
+			/*case DisabledRoll:
 				if(palReadPad(GPIOA, GPIOA_BUTTON)){
 						// ENABLE / DISABLE
 						setState(RollAssistance, EnabledRoll);
 					}
-			break;
+			break;*/
 		}
 		chThdSleepMilliseconds(100);
 	}
@@ -341,31 +372,69 @@ static THD_FUNCTION(OCMTask, arg) {
 static THD_WORKING_AREA(waAltAssisTask, 128);
 static THD_FUNCTION(AltAssisTask, arg) {
 	(void)arg;
+	int throttle=1;
+	int altitudeVal=100;
+	int pitchInput=1;
+
 	while(TRUE){
 		switch(currentState[AltAssistance]){
 			case EnabledSteady:
+				if(throttle==1){
+					setState(AltAssistance, EnabledFlight);
+				}
 			break;
 
 			case EnabledFlight:
+				if(altitudeVal < landingAltitude){					//altitude<LANDING_ALTITUDE
+					setState(AltAssistance, EnabledLanding);
+				}
+				else if((int8_t)gyroData[0] > verticalAngle){		//pitch>Vertical_Angle
+					setState(AltAssistance, EnabledVerticalClimbing);
+				}
+				else if(((int8_t)gyroData[0] < -3.0f)){				//nose dive >0
+					setState(AltAssistance, EnabledStallRecovery);
+				}
 			break;
 
 			case EnabledVerticalClimbing:
+				if((int8_t)gyroData[0] < verticalAngle){		//pitch<Vertical_Angle
+					setState(AltAssistance, EnabledFlight);
+				}
 			break;
 
 			case EnabledLanding:
+				if((int8_t)gyroData[0] < minLandingPitch){		//pitch<MIN_LANDING_PITCH
+					setState(AltAssistance, EnabledAltBlocking);
+				}
+				else if(altitudeVal > landingAltitude){					//altitude>LANDING_ALTITUDE
+					setState(AltAssistance, EnabledFlight);
+				}
 			break;
 
 			case EnabledAltBlocking:
+				if((pitchInput>0)||((int8_t)gyroData[0] > minLandingPitch)){ //pitch_input>0 || pitch>MIN_LANDING_PITCH
+					setState(AltAssistance, EnabledLanding);
+				}
+				else if(altitudeVal > landingAltitude){					//altitude>LANDING_ALTITUDE
+					setState(AltAssistance, EnabledFlight);
+				}
 			break;
 
-			case EnabledSallRecovery:
+			case EnabledStallRecovery:
+				if((int8_t)gyroData[0] > 1.0f){		//pitch>0
+					setState(AltAssistance, EnabledFlight);
+				}
+				//Transition from here to emergency state if the timeout is reached
 			break;
 
 			case EnabledEmergencyManual:
+				if((int8_t)gyroData[0] > 1.0f){		//pitch>0
+					setState(AltAssistance, EnabledFlight);
+				}
 			break;
 
-			case DisabledAlt:
-			break;
+			/*case DisabledAlt:
+			break;*/
 		}
 		chThdSleepMilliseconds(100);
 	}
@@ -409,6 +478,10 @@ int main(void) {
     //pwm start config
     //pwmStart(&PWMD4, &pwmcfg);
     while (TRUE) {
+
+    	/*if(palReadPad(GPIOA, GPIOA_BUTTON)==0){
+    		palSetPad(GPIOE, GPIOE_LED8_ORANGE);
+    	}*/
     	chThdSleepMilliseconds(1000);
     }
 }
