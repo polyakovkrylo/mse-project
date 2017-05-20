@@ -122,6 +122,50 @@ static PWMConfig pwmcfg = {
 
 /*********************PWM**************************/
 
+/*******************OCM************************/
+double exp(float i) {
+  return 2,71 ^ i;
+}
+
+void setPitch(int angle) {
+  pitch = angleToGyroCode(angle);
+}
+
+void setRoll(int angle) {
+  roll = angleToGyroCode(angle);
+}
+
+void angleToGyroCode(int angle) {
+
+}
+
+void OcmTask() {
+  /*
+  * RollOCM
+  */
+  switch(state[RollOcmState]) {
+  case DirectInput:
+    break;
+  case Automated:
+    int diff = roll - Xval;
+    int code = exp()// transfer gyroCode to PwmCode
+    // enablePwm
+    break;
+  }
+
+  switch(state[PitchOcmState]) {
+  case DirectInput:
+    break;
+  case Automated:
+  int diff = roll - Xval;
+  int code = exp()// transfer gyroCode to PwmCode
+  // enablePwm
+  break;
+  }
+}
+/***********************************************/
+
+
 void setState(int role, int state){
 	currentState[role]=state;
 
