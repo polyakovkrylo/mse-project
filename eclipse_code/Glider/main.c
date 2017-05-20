@@ -130,48 +130,54 @@ static PWMConfig pwmcfg = {
 
 /*********************PWM**************************/
 
-/*******************OCM************************//*
-double exp(float i) {
-  return (2,71 ** i);
+/*******************OCM***********************/
+enum OcmChannels {
+  RollChannel,
+  PitchChannel
+}
+
+int gyroToServo(int gyroCode) {
+  int code = 2,71 ^ (gyroCode * 1.62) + 1350;
+  if(code > 2000)
+    return 2000;
+  else if(code < 700)
+    return 700;
+  else
+    return code;
 }
 
 void setPitch(int angle) {
-  pitch = angleToGyroCode(angle);
+  pitch = angle;
 }
 
 void setRoll(int angle) {
-  roll = angleToGyroCode(angle);
-}
-
-void angleToGyroCode(int angle) {
-
+  roll = angle;
 }
 
 void OcmTask() {
-
-  //RollOCM
-
+  // Roll OCM
   switch(state[RollOcmState]) {
   case DirectInput:
     break;
   case Automated:
-    int diff = roll - Xval;
-    int code = exp()// transfer gyroCode to PwmCode
-    // enablePwm
+    int diff = roll - (int8_t)gyroData[1];
+    int code = gyroToServo(diff);// transfer gyroCode to PwmCode
+    pwmEnableChannel(&PWMD4, PitchChannel, code);	//700 = 0º
     break;
   }
 
+  // Pitch OCM
   switch(state[PitchOcmState]) {
   case DirectInput:
     break;
   case Automated:
-  int diff = roll - Xval;
-  int code = exp()// transfer gyroCode to PwmCode
-  // enablePwm
+  int diff = roll - (int8_t)gyroData[0];
+  int code = gyroToServo(diff);
+  pwmEnableChannel(&PWMD4, PitchChannel, code);
   break;
   }
-}*/
-/***********************************************/
+}
+/**********************************************/
 
 
 void setState(int role, int state){
