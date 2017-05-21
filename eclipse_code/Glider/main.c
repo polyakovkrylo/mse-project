@@ -6,6 +6,7 @@
 #include "i2c.h"
 #include "usbcfg.h"
 #include <stdlib.h>
+#include <math.h>
 
 #define ABS(x)	(x < 0) ? (-x) : x
 
@@ -13,7 +14,8 @@ enum Roles{
 	RollAssistance,
 	AltAssistance,
 	Mode,
-	RollOcm
+	RollOcm,
+	PitchOcm
 };
 
 enum RollAssisStates{
@@ -48,11 +50,13 @@ enum OcmStates{
 	Automated
 };
 // System state
-int currentState[3];
+int currentState[5];
 static int landingAltitude=50;
 static int8_t minLandingPitch=-6.0f;
 static int8_t treshold=4.0f;
 static int8_t verticalAngle=5.0f;
+static int8_t pitch=0;
+static int8_t roll=0;
 
 /*********************gyroscope*********************/
 uint8_t Xval, Yval = 0x00;
@@ -134,10 +138,10 @@ static PWMConfig pwmcfg = {
 enum OcmChannels {
   RollChannel,
   PitchChannel
-}
+};
 
-int gyroToServo(int gyroCode) {
-  int code = 2,71 ^ (gyroCode * 1.62) + 1350;
+int gyroToServo(int8_t gyroCode) {
+  int code = 700;//2.71f(gyroCode * 1.62f) + 1350;
   if(code > 2000)
     return 2000;
   else if(code < 700)
@@ -154,28 +158,37 @@ void setRoll(int angle) {
   roll = angle;
 }
 
-void OcmTask() {
+static THD_WORKING_AREA(waOcmTask, 128);
+static THD_FUNCTION(OcmTask, arg) {
+	chRegSetThreadName("Thread1");
+	palSetPadMode(GPIOD, 12, PAL_MODE_ALTERNATE(2));
+	pwmStart(&PWMD4, &pwmcfg);
+	while (TRUE) {
   // Roll OCM
-  switch(state[RollOcmState]) {
-  case DirectInput:
-    break;
-  case Automated:
-    int diff = roll - (int8_t)gyroData[1];
-    int code = gyroToServo(diff);// transfer gyroCode to PwmCode
-    pwmEnableChannel(&PWMD4, PitchChannel, code);	//700 = 0º
-    break;
-  }
+//  int diff;
+//  int code;
+//  switch(currentState[RollOcm]) {
+//  case DirectInput:
+//    break;
+//  case Automated:
+//    diff = roll - (int8_t)gyroData[1];
+//    code = gyroToServo(diff);// transfer gyroCode to PwmCode
+		pwmEnableChannel(&PWMD4, RollChannel, 700);	//700 = 0º
+//    break;
+//  }
 
   // Pitch OCM
-  switch(state[PitchOcmState]) {
-  case DirectInput:
-    break;
-  case Automated:
-  int diff = roll - (int8_t)gyroData[0];
-  int code = gyroToServo(diff);
-  pwmEnableChannel(&PWMD4, PitchChannel, code);
-  break;
-  }
+//  switch(currentState[PitchOcm]) {
+//  case DirectInput:
+//    break;
+//  case Automated:
+//	int diff;
+//	diff = (int8_t)roll - (int8_t)gyroData[0];
+//	int code = gyroToServo(diff);
+//	pwmEnableChannel(&PWMD4, PitchChannel, code);
+//	break;
+//  }
+	    }
 }
 /**********************************************/
 
@@ -255,46 +268,46 @@ static THD_WORKING_AREA(waGyrosTask, 128);
 static THD_FUNCTION(GyrosTask, arg) {
 
     (void)arg;
-    chRegSetThreadName("Thread1");
-    palSetPadMode(GPIOD, 12, PAL_MODE_ALTERNATE(2));
-    pwmStart(&PWMD4, &pwmcfg);
-    while (TRUE) {
+//    chRegSetThreadName("Thread1");
+//    palSetPadMode(GPIOD, 12, PAL_MODE_ALTERNATE(2));
+//    pwmStart(&PWMD4, &pwmcfg);
+//    while (TRUE) {
 
 		while (readGyro(gyroData)==0) {}
-			palClearPad(GPIOE, GPIOE_LED3_RED);
-			palClearPad(GPIOE, GPIOE_LED4_BLUE);
-			palClearPad(GPIOE, GPIOE_LED5_ORANGE);
-			palClearPad(GPIOE, GPIOE_LED6_GREEN);
-			palClearPad(GPIOE, GPIOE_LED7_GREEN);
-			//palClearPad(GPIOE, GPIOE_LED8_ORANGE);
-			palClearPad(GPIOE, GPIOE_LED9_BLUE);
-			palClearPad(GPIOE, GPIOE_LED10_RED);
-
-			//Xval = ABS((int8_t)(gyroData[0]));
-			//Yval = ABS((int8_t)(gyroData[1]));
-
-			//if ( Xval>Yval){
-				if ((int8_t)gyroData[0] > 4.0f){
-					palSetPad(GPIOE, GPIOE_LED3_RED);
-					pwmEnableChannel(&PWMD4, 0, 700);
-				}
-				else if ((int8_t)gyroData[0] < -4.0f){
-					palSetPad(GPIOE, GPIOE_LED10_RED);
-					pwmEnableChannel(&PWMD4, 0, 1350);
-				}
-			//}
-			//else{
-				else if ((int8_t)gyroData[1] < -4.0f){
-					palSetPad(GPIOE, GPIOE_LED7_GREEN);
-					pwmEnableChannel(&PWMD4, 0, 2000);
-				}
-				else if ((int8_t)gyroData[1] > 4.0f){
-					palSetPad(GPIOE, GPIOE_LED6_GREEN);
-					pwmEnableChannel(&PWMD4, 0, 1350);
-				}
-			//}
-				chThdSleepMilliseconds(100);
-	}
+//			palClearPad(GPIOE, GPIOE_LED3_RED);
+//			palClearPad(GPIOE, GPIOE_LED4_BLUE);
+//			palClearPad(GPIOE, GPIOE_LED5_ORANGE);
+//			palClearPad(GPIOE, GPIOE_LED6_GREEN);
+//			palClearPad(GPIOE, GPIOE_LED7_GREEN);
+//			//palClearPad(GPIOE, GPIOE_LED8_ORANGE);
+//			palClearPad(GPIOE, GPIOE_LED9_BLUE);
+//			palClearPad(GPIOE, GPIOE_LED10_RED);
+//
+//			//Xval = ABS((int8_t)(gyroData[0]));
+//			//Yval = ABS((int8_t)(gyroData[1]));
+//
+//			//if ( Xval>Yval){
+//				if ((int8_t)gyroData[0] > 4.0f){
+//					palSetPad(GPIOE, GPIOE_LED3_RED);
+//					pwmEnableChannel(&PWMD4, 0, 700);
+//				}
+//				else if ((int8_t)gyroData[0] < -4.0f){
+//					palSetPad(GPIOE, GPIOE_LED10_RED);
+//					pwmEnableChannel(&PWMD4, 0, 1350);
+//				}
+//			//}
+//			//else{
+//				else if ((int8_t)gyroData[1] < -4.0f){
+//					palSetPad(GPIOE, GPIOE_LED7_GREEN);
+//					pwmEnableChannel(&PWMD4, 0, 2000);
+//				}
+//				else if ((int8_t)gyroData[1] > 4.0f){
+//					palSetPad(GPIOE, GPIOE_LED6_GREEN);
+//					pwmEnableChannel(&PWMD4, 0, 1350);
+//				}
+//			//}
+//				chThdSleepMilliseconds(100);
+//	}
 }
 
 static THD_WORKING_AREA(waRollAssisTask, 128);
@@ -472,12 +485,14 @@ int main(void) {
 	i2cStart(&I2CD1, &i2cconfig);
 	initGyro();
 
+	setState(RollOcm, DirectInput);
+
     //palSetPadMode(GPIOD, 12, PAL_MODE_ALTERNATE(2));
 
     //tasks init
     chThdCreateStatic(waGyrosTask, sizeof(waGyrosTask), NORMALPRIO+1, GyrosTask, NULL);
     chThdCreateStatic(waRollAssisTask, sizeof(waRollAssisTask), NORMALPRIO+2, RollAssisTask, NULL);
-    chThdCreateStatic(waOCMTask, sizeof(waOCMTask), NORMALPRIO+3, OCMTask, NULL);
+//    chThdCreateStatic(waOcmTask, sizeof(waOcmTask), NORMALPRIO+3, OcmTask, NULL);
     chThdCreateStatic(waAltAssisTask, sizeof(waAltAssisTask), NORMALPRIO+4, AltAssisTask, NULL);
     chThdCreateStatic(waModeTask, sizeof(waModeTask), NORMALPRIO+5, ModeTask, NULL);
 

@@ -86,7 +86,7 @@ endif
 PROJECT = ch
 
 # Imported source files and paths
-CHIBIOS = /home/hector/Programs/eclipse/ChibiOS_16.1.7
+CHIBIOS = /home/bobiko/chibios
 # Startup files.
 include $(CHIBIOS)/os/common/ports/ARMCMx/compilers/GCC/mk/startup_stm32f3xx.mk
 # HAL-OSAL files (optional).
@@ -159,7 +159,7 @@ INCDIR = $(STARTUPINC) $(KERNINC) $(PORTINC) $(OSALINC) \
 MCU  = cortex-m4
 
 #TRGT = arm-elf-
-TRGT = arm-none-eabi-
+TRGT = /home/bobiko/tools/gcc-arm-none-eabi/bin/arm-none-eabi-
 CC   = $(TRGT)gcc
 CPPC = $(TRGT)g++
 # Enable loading with g++ only if you need C++ runtime support.

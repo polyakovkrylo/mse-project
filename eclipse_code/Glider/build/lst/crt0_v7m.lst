@@ -1,7 +1,7 @@
-ARM GAS  /tmp/ccek5eHk.s 			page 1
+ARM GAS  /tmp/cc0ONgSz.s 			page 1
 
 
-   1              	# 1 "/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s"
+   1              	# 1 "/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s"
    1              	/*
    0              	
    0              	
@@ -58,7 +58,7 @@ ARM GAS  /tmp/ccek5eHk.s 			page 1
   52              	/*===========================================================================*/
   53              	
   54              	/**
-ARM GAS  /tmp/ccek5eHk.s 			page 2
+ARM GAS  /tmp/cc0ONgSz.s 			page 2
 
 
   55              	 * @brief   FPU initialization switch.
@@ -118,7 +118,7 @@ ARM GAS  /tmp/ccek5eHk.s 			page 1
  109              	
  110              	/**
  111              	 * @brief   RAM areas initialization switch.
-ARM GAS  /tmp/ccek5eHk.s 			page 3
+ARM GAS  /tmp/cc0ONgSz.s 			page 3
 
 
  112              	 */
@@ -178,7 +178,7 @@ ARM GAS  /tmp/ccek5eHk.s 			page 1
  166              	 */
  167              	                .align  2
  168              	                .thumb_func
-ARM GAS  /tmp/ccek5eHk.s 			page 4
+ARM GAS  /tmp/cc0ONgSz.s 			page 4
 
 
  169              	                .global Reset_Handler
@@ -238,7 +238,7 @@ ARM GAS  /tmp/ccek5eHk.s 			page 1
  223 005c FFF7FEFF 	                bl      __early_init
  224              	
  225              	#if CRT0_INIT_STACKS == TRUE
-ARM GAS  /tmp/ccek5eHk.s 			page 5
+ARM GAS  /tmp/cc0ONgSz.s 			page 5
 
 
  226 0060 4FF05530 	                ldr     r0, =CRT0_STACKS_FILL_PATTERN
@@ -298,7 +298,7 @@ ARM GAS  /tmp/ccek5eHk.s 			page 1
  280              	#endif
  281              	
  282              	                /* Late initialization..*/
-ARM GAS  /tmp/ccek5eHk.s 			page 6
+ARM GAS  /tmp/cc0ONgSz.s 			page 6
 
 
  283 00a8 FFF7FEFF 	                bl      __late_init
@@ -338,21 +338,21 @@ ARM GAS  /tmp/ccek5eHk.s 			page 1
  315      00000000 
  315      00000000 
  315      00000000 
-ARM GAS  /tmp/ccek5eHk.s 			page 7
+ARM GAS  /tmp/cc0ONgSz.s 			page 7
 
 
 DEFINED SYMBOLS
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:167    .text:00000000 $t
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:170    .text:00000000 Reset_Handler
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:232    .text:00000068 msloop
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:243    .text:00000076 psloop
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:256    .text:00000086 dloop
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:270    .text:0000009a bloop
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:289    .text:000000b0 initloop
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:295    .text:000000bc endinitloop
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:305    .text:000000c4 finiloop
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:311    .text:000000d0 endfiniloop
-/home/hector/Programs/eclipse/ChibiOS_16.1.7/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:315    .text:000000d4 $d
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:167    .text:00000000 $t
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:170    .text:00000000 Reset_Handler
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:232    .text:00000068 msloop
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:243    .text:00000076 psloop
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:256    .text:00000086 dloop
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:270    .text:0000009a bloop
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:289    .text:000000b0 initloop
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:295    .text:000000bc endinitloop
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:305    .text:000000c4 finiloop
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:311    .text:000000d0 endfiniloop
+/home/bobiko/chibios/os/common/ports/ARMCMx/compilers/GCC/crt0_v7m.s:315    .text:000000d4 $d
 
 UNDEFINED SYMBOLS
 __process_stack_end__
