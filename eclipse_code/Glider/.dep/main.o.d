@@ -95,24 +95,23 @@ build/obj/main.o: main.c /home/bobiko/chibios/os/rt/include/ch.h \
  /home/bobiko/chibios/os/hal/include/serial_usb.h \
  /home/bobiko/chibios/os/hal/include/usb_cdc.h \
  /home/bobiko/chibios/test/rt/test.h \
- /home/bobiko/chibios/os/hal/lib/streams/chprintf.h \
- /home/bobiko/tools/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/5.4.1/include/stdarg.h \
  /home/bobiko/chibios/os/hal/include/spi.h \
- /home/bobiko/chibios/os/hal/include/i2c.h usbcfg.h \
- /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/stdlib.h \
- /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/machine/ieeefp.h \
+ /home/bobiko/chibios/os/hal/include/i2c.h routine.h \
+ /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/math.h \
+ /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/reent.h \
  /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/_ansi.h \
  /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/newlib.h \
  /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/config.h \
- /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/reent.h \
- /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/_ansi.h \
+ /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/machine/ieeefp.h \
  /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/_types.h \
  /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/machine/_types.h \
  /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/lock.h \
  /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/cdefs.h \
+ /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/_ansi.h \
+ gyroconf.h pwmconf.h \
+ /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/stdlib.h \
  /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/machine/stdlib.h \
- /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/alloca.h \
- /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/math.h
+ /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/alloca.h
 
 /home/bobiko/chibios/os/rt/include/ch.h:
 
@@ -316,19 +315,15 @@ mcuconf.h:
 
 /home/bobiko/chibios/test/rt/test.h:
 
-/home/bobiko/chibios/os/hal/lib/streams/chprintf.h:
-
-/home/bobiko/tools/gcc-arm-none-eabi/lib/gcc/arm-none-eabi/5.4.1/include/stdarg.h:
-
 /home/bobiko/chibios/os/hal/include/spi.h:
 
 /home/bobiko/chibios/os/hal/include/i2c.h:
 
-usbcfg.h:
+routine.h:
 
-/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/stdlib.h:
+/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/math.h:
 
-/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/machine/ieeefp.h:
+/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/reent.h:
 
 /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/_ansi.h:
 
@@ -336,9 +331,7 @@ usbcfg.h:
 
 /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/config.h:
 
-/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/reent.h:
-
-/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/_ansi.h:
+/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/machine/ieeefp.h:
 
 /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/_types.h:
 
@@ -348,8 +341,14 @@ usbcfg.h:
 
 /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/sys/cdefs.h:
 
+/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/_ansi.h:
+
+gyroconf.h:
+
+pwmconf.h:
+
+/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/stdlib.h:
+
 /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/machine/stdlib.h:
 
 /home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/alloca.h:
-
-/home/bobiko/tools/gcc-arm-none-eabi/arm-none-eabi/include/math.h:
